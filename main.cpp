@@ -14,6 +14,7 @@ size_t my_strnlen(const char *str, size_t maxlen);
 char * my_strchr(const char *str, int ch);
 char * my_strrchr(const char *str, int ch);
 char * my_strstr(const char *haystack, const char *needle);
+ssize_t my_getline(char **lineptr, size_t *n, FILE *stream);
 const char *word = "Phystech";
 
 const int SIZE_OF_BUF = 500;
@@ -67,6 +68,12 @@ int main(void)
 
     // test my_strstr
     printf("%s\n", my_strstr(word, "hys"));
+
+    // test my_getline
+    ptr = (char *) calloc(2, sizeof(int));
+    my_getline(&ptr, (size_t *)&n, stdin);
+    my_puts(ptr);
+    free(ptr);
 
     return 0;
 }
@@ -308,4 +315,52 @@ char * my_strstr(const char *haystack, const char *needle)
     }
 
     return NULL;
+}
+
+ssize_t my_getline(char **lineptr, size_t *n, FILE *stream)
+{
+    int counter = 0;
+    int start_size = 2;
+    int ch = '\0';
+    int read = 0;
+
+    char *arr = (char *)calloc(start_size, sizeof(char));
+    if (*lineptr != NULL)
+    {
+        free(*lineptr);
+    }
+
+    while (!read)
+    {
+        start_size *= start_size;
+        arr = (char *)realloc(arr, start_size * sizeof(int));
+
+        while (counter < start_size)
+        {
+            ch = getc(stream);
+            if (ch != EOF)
+            {
+                arr[counter] = ch;
+                counter++;
+                if (ch =='\n')
+                {
+                    read = 1;
+                    break;
+                }
+            }
+            else
+            {
+                read = 1;
+                break;
+            }
+        }
+
+        if (ch == EOF || ch == '\n')
+        {
+            *n = counter;
+            *lineptr = arr;
+            return *n;
+           }
+    }
+    return -1;
 }
